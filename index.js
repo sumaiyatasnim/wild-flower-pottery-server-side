@@ -69,6 +69,20 @@ async function run() {
             });
             res.send(result);
         });
+        // delete product
+        // app.delete("/delteOrder/:id", async (req, res) => {
+        //     const result = await productCollection.deleteOne({
+        //         _id: ObjectId(req.params.id),
+        //     });
+        //     res.send(result);
+        // });
+        app.delete("/allProducts/delete/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await productCollection.deleteOne(query);
+            res.json(result);
+        });
+
         //Post api
         app.post('/addProducts', async (req, res) => {
             //jei request ta pathano hocche shei product ta pabo req.body theke.
@@ -76,9 +90,48 @@ async function run() {
             // console.log('hit the post api', products);
             const result = await productCollection.insertOne(products);
             console.log(result);
-
             res.json(result)
+        });
+
+        //user info post
+        app.post("/addUserInfo", async (req, res) => {
+            console.log("req.body");
+            const result = await usersCollection.insertOne(req.body);
+            res.send(result);
+            console.log(result);
+        });
+
+        //userInfo upsert
+        app.put('/users', async (req, res) => {
+            const user = req.body;
+            const filter = { email: user.email };
+            const options = { upsert: true };
+            const updateDoc = { $set: user };
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            res.json(result);
+            console.log("PUT", user);
+
         })
+
+        app.put("/makeAdmin", async (req, res) => {
+            const filter = { email: req.body.email };
+            const result = await usersCollection.find(filter).toArray();
+            if (result) {
+                const documents = await usersCollection.updateOne(filter, {
+                    $set: { role: "admin" },
+                });
+                console.log(documents);
+            }
+            // else {
+            //   const role = "admin";
+            //   const result3 = await usersCollection.insertOne(req.body.email, {
+            //     role: role,
+            //   });
+            // }
+
+            // console.log(result);
+        });
+
     }
     finally {
         //jokhon shob kaj hoye jabe tokhon she close korar cheshta korbe
