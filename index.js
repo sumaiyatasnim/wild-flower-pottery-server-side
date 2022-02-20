@@ -93,44 +93,43 @@ async function run() {
             res.json(result)
         });
 
-        //user info post
-        app.post("/addUserInfo", async (req, res) => {
+        //user info post . users er kache post kora mane new ekta collection users e add hbe
+        app.post("/addUser", async (req, res) => {
+            const user = req.body;
             console.log("req.body");
-            const result = await usersCollection.insertOne(req.body);
-            res.send(result);
+            const result = await usersCollection.insertOne(user);
+            res.json(result);
             console.log(result);
         });
 
-        //userInfo upsert
-        app.put('/users', async (req, res) => {
+        app.put('/addUser', async (req, res) => {
             const user = req.body;
-            const filter = { email: user.email };
-            const options = { upsert: true };
-            const updateDoc = { $set: user };
-            const result = await usersCollection.updateOne(filter, updateDoc, options);
-            res.json(result);
-            console.log("PUT", user);
-
+            console.log('put', user);
+            //user ache ki nei email diye check korbo 
+            const filter = { email: user.email }
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: user
+            }
+            const result = await usersCollection.updateOne(filter, updateDoc, options)
+            res.send(result)
         })
 
-        app.put("/makeAdmin", async (req, res) => {
-            const filter = { email: req.body.email };
-            const result = await usersCollection.find(filter).toArray();
-            if (result) {
-                const documents = await usersCollection.updateOne(filter, {
-                    $set: { role: "admin" },
-                });
-                console.log(documents);
-            }
-            // else {
-            //   const role = "admin";
-            //   const result3 = await usersCollection.insertOne(req.body.email, {
-            //     role: role,
-            //   });
-            // }
 
-            // console.log(result);
-        });
+
+        //userInfo upsert
+        // app.put('/users', async (req, res) => {
+        //     const user = req.body;
+        //     const filter = { email: user.email };
+        //     const options = { upsert: true };
+        //     const updateDoc = { $set: user };
+        //     const result = await usersCollection.updateOne(filter, updateDoc, options);
+        //     res.json(result);
+        //     console.log("PUT", user);
+
+        // })
+
+
 
     }
     finally {
